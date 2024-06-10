@@ -5,6 +5,7 @@ from discord.ext import commands
 from discord.utils import get
 from views.event_apps_views import EventAppButton
 import config
+import os
 
 class EventTeamApp(commands.Cog):
     def __init__(self, bot):
@@ -28,6 +29,17 @@ class EventTeamApp(commands.Cog):
         if channel is None:
             channel = interaction.channel
 
+        questions_file = 'data/questions.json'
+        if not os.path.exists(questions_file):
+            await interaction.response.send_message("No questions found. Please add questions first.", ephemeral=True)
+            return
+
+        with open(questions_file, 'r') as f:
+            data = json.load(f)
+            if not data.get("questions") or len(data["questions"]) == 0:
+                await interaction.response.send_message("No questions found. Please add questions first.", ephemeral=True)
+                return
+                
         embed = discord.Embed(
             title="BeluGANG Event Team Application!",
             description=
@@ -41,7 +53,7 @@ class EventTeamApp(commands.Cog):
 
         await channel.send(embed=embed, view=self.persistent_view)
         await interaction.response.send_message(
-            "Successfully posted the ET Application embed!") # btw you can add "ephemeral=True" to make the message only visible to the user who triggered the command. For example: await interaction.response.send_message("Successfully posted the ET Application embed!", ephemeral=True)
+            "Successfully posted the ET Application!")
 
     @app_commands.command(
         name="purge-cooldown",
@@ -49,9 +61,9 @@ class EventTeamApp(commands.Cog):
     @app_commands.guild_only()
     async def purge_cooldown(self, interaction: discord.Interaction):
         with open('data/setup-data.json', 'r') as f:
-            config = json.load(f)
-            cooldown_role_id = int(config['app_cooldown_role_id'])
-
+            role_data = json.load(f)
+            cooldown_role_id = int(role_data['app_cooldown_role_id'])
+                    
             guild = interaction.guild
 
             if guild is None:
@@ -81,6 +93,82 @@ class EventTeamApp(commands.Cog):
 
             await interaction.response.send_message(
                 f"Removed the cooldown role from **{len(members_with_role)}** member(s).")
-                
+
+    @app_commands.command(name="add-question", description="Add questions to the Event Application")
+    @app_commands.guild_only()
+    @app_commands.describe(label="What will be the question?")
+    @app_commands.describe(placeholder="Placeholder for the answer field")
+    @app_commands.choices(style=[
+        app_commands.Choice(name="Short", value="short"),
+        app_commands.Choice(name="Long", value="long"),
+        app_commands.Choice(name="Paragraph", value="paragraph")
+    ])
+    @app_commands.describe(max_length="Max length of answer (shouldn't exceed 1000)")
+    @app_commands.describe(required="Required or Optional?")
+    async def add_question(self, interaction: discord.Interaction, label: str, style: app_commands.Choice[str], max_length: int, required: bool, placeholder: str = None):
+        questions_file = 'data/questions.json'
+        if not os.path.exists(questions_file):
+            with open(questions_file, 'w') as f:
+                json.dump({"questions": []}, f, indent=4)
+
+        with open(questions_file, 'r+') as f:
+            data = json.load(f)
+            question_number = len(data["questions"]) + 1
+
+            if placeholder is None:
+                placeholder = ""
+
+            question_data = {
+                "label": label,
+                "placeholder": placeholder,
+                "style": style.value,
+                "max_length": max_length,
+                "required": required,
+                "id": question_number
+            }
+            data["questions"].append(question_data)
+            f.seek(0)
+            json.dump(data, f, indent=4)
+
+        await interaction.response.send_message(f"Question **#{question_number}** added successfully!", ephemeral=True)
+
+    @app_commands.command(name="delete-question", description="Delete a question from the Event Application")
+    @app_commands.guild_only()
+    @app_commands.describe(label="Select the question to delete")
+    async def delete_question(self, interaction: discord.Interaction, label: str):
+        questions_file = 'data/questions.json'
+        if not os.path.exists(questions_file):
+            await interaction.response.send_message("No questions found to delete.", ephemeral=True)
+            return
+
+        with open(questions_file, 'r+') as f:
+            data = json.load(f)
+            question_to_delete = next((q for q in data["questions"] if q["label"] == label), None)
+
+            if question_to_delete is None:
+                await interaction.response.send_message(f"No question found with the label **'{label}'**.", ephemeral=True)
+                return
+
+            data["questions"].remove(question_to_delete)
+            f.seek(0)
+            f.truncate()
+            json.dump(data, f, indent=4)
+
+        await interaction.response.send_message(f"Question deleted successfully!")
+
+    @delete_question.autocomplete('label')
+    async def autocomplete_label(self, interaction: discord.Interaction, current: str):
+        questions_file = 'data/questions.json'
+        if not os.path.exists(questions_file):
+            return []
+
+        with open(questions_file, 'r') as f:
+            data = json.load(f)
+            return [
+                app_commands.Choice(name=q["label"], value=q["label"])
+                for q in data["questions"] if current.lower() in q["label"].lower()
+            ]
+
 async def setup(bot):
     await bot.add_cog(EventTeamApp(bot))
+                               
