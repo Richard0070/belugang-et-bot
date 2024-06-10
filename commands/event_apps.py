@@ -130,7 +130,7 @@ class EventTeamApp(commands.Cog):
             f.seek(0)
             json.dump(data, f, indent=4)
 
-        await interaction.response.send_message(f"Question **#{question_number}** added successfully!", ephemeral=True)
+        await interaction.response.send_message(f"Question **#{question_number}** added successfully!")
 
     @app_commands.command(name="delete-question", description="Delete a question from the Event Application")
     @app_commands.guild_only()
