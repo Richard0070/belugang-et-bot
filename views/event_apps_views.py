@@ -60,7 +60,7 @@ class EventAppModal(discord.ui.Modal):
         forum_channel = guild.get_channel(forum_channel_id)
         if forum_channel is None:
             await interaction.response.send_message(
-                f"Event Application submission has been temporarily paused.",
+                f"Event Application submissions have been temporarily paused.",
                 ephemeral=True)
             return
 
@@ -99,13 +99,13 @@ class EventAppButton(discord.ui.View):
             
         questions_file = 'data/questions.json'
         if not os.path.exists(questions_file):
-            await interaction.response.send_message("Event Application submission has been temporarily paused.", ephemeral=True)
+            await interaction.response.send_message("Event Application submissions have been temporarily paused.", ephemeral=True)
             return
 
         with open(questions_file, 'r') as f:
             data = json.load(f)
             if not data.get("questions") or len(data["questions"]) == 0:
-                await interaction.response.send_message("Event Application submission has been temporarily paused.", ephemeral=True)
+                await interaction.response.send_message("Event Application submissions have been temporarily paused.", ephemeral=True)
                 return
                         
         cooldown_role_id = int(config_data['app_cooldown_role_id'])
@@ -121,7 +121,7 @@ class EventAppButton(discord.ui.View):
             return
 
         if not await self.check_app_channel():
-            await interaction.response.send_message("Event Application submission has been temporarily paused.", ephemeral=True)
+            await interaction.response.send_message("Event Application submissions have been temporarily paused.", ephemeral=True)
             return
 
         if cooldown_role in interaction.user.roles:
