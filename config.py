@@ -1,6 +1,4 @@
-import os
-
-TOKEN = os.environ['TOKEN']
+TOKEN = ""
 
 # EMOJIS — 
 
