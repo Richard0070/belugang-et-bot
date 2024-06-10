@@ -93,10 +93,21 @@ class EventAppButton(discord.ui.View):
                        style=discord.ButtonStyle.blurple,
                        custom_id="fill_app",
                        emoji=config.FILL_APP)
-    async def create_tag_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
+    async def fill_app_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
         with open(self.setup_data_file, 'r') as f:
             config_data = json.load(f)
+            
+        questions_file = 'data/questions.json'
+        if not os.path.exists(questions_file):
+            await interaction.response.send_message("Event Application submission has been temporarily paused.", ephemeral=True)
+            return
 
+        with open(questions_file, 'r') as f:
+            data = json.load(f)
+            if not data.get("questions") or len(data["questions"]) == 0:
+                await interaction.response.send_message("Event Application submission has been temporarily paused.", ephemeral=True)
+                return
+                        
         cooldown_role_id = int(config_data['app_cooldown_role_id'])
 
         guild = interaction.guild
