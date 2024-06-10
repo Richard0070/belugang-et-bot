@@ -9,7 +9,7 @@ class EventAppModal(discord.ui.Modal):
         with open('data/questions.json', 'r') as f:
             questions = json.load(f)['questions']
 
-        super().__init__(title='Fill this to apply for events team', timeout=3600)
+        super().__init__(title='Event Team Application', timeout=3600)
         self.bot = bot
 
         self.questions = []
