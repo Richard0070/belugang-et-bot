@@ -13,7 +13,7 @@ class Setup(commands.Cog):
     @app_commands.default_permissions(manage_guild=True)
     async def _setup(self, interaction: discord.Interaction):
 
-        embed = discord.Embed(title="🧪 Setup Wizard", description="Configure the Event Team role IDs and other stuff using this interactive menu. Press the buttons below to continue!", color=0x27272F)
+        embed = discord.Embed(title="🧪  Setup Wizard", description="Configure the Event Team role IDs and other stuff using this interactive menu. Press the buttons below to continue!", color=0x27272F)
 
         view = SetupButtons(self.bot, interaction)
 
