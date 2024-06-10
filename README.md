@@ -7,3 +7,7 @@ Put the Bot token in the `config.py` file. You can also customize the emojis use
 **IMPORTANT** ❗
 
 While setting up the modmail forum channel, make sure to add the tags: `open` & `closed`. Otherwise, it won't work properly. Don't forget to give the bot the necessary permissions.
+
+<br>
+
+🤝  @Mr-Gangsta
