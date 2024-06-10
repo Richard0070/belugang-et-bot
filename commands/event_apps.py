@@ -154,7 +154,7 @@ class EventTeamApp(commands.Cog):
             f.truncate()
             json.dump(data, f, indent=4)
 
-        await interaction.response.send_message(f"Question deleted successfully!")
+        await interaction.response.send_message(f"{config.DELETE} Question deleted successfully!")
 
     @delete_question.autocomplete('label')
     async def autocomplete_label(self, interaction: discord.Interaction, current: str):
