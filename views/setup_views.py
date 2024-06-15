@@ -1,7 +1,7 @@
 import discord
 import os
 import json
-import config 
+import config
 
 class SetupButtons(discord.ui.View):
     def __init__(self, bot, interaction):
@@ -11,6 +11,9 @@ class SetupButtons(discord.ui.View):
         
     @discord.ui.button(label="View Configuration", style=discord.ButtonStyle.blurple)
     async def _view_config(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if self.author.id != interaction.user.id:
+            await interaction.response.send_message("You can't control these buttons!", ephemeral=True)
+            return
         
         if not os.path.exists('data/setup-data.json'):
             return
@@ -38,20 +41,13 @@ class SetupButtons(discord.ui.View):
         embed=discord.Embed(title="Current Configuration", color=0x6e5ce7)
 
         embed.add_field(name=f"{config.ET}  Event Team Role(s)", value=f"{config.REPLY}  {event_team_roles}", inline=False)
-
         embed.add_field(name=f"{config.EM}  Event Manager Role(s)", value=f"{config.REPLY}  {event_manager_roles}", inline=False)
-
         embed.add_field(name=f"{config.CHANNEL}  Modmail Channel", value=f"{config.REPLY}  {modmail_channel}", inline=False)
-
         embed.add_field(name=f"{config.CHANNEL}  App Submission Channel", value=f"{config.REPLY}  {app_submission_channel}", inline=False) 
-        
         embed.add_field(name=f"{config.MENTION}  App Cooldown Role ID", value=f"{config.REPLY}  {app_cooldown_role_id}", inline=False) 
         
-        if self.author.id == interaction.user.id:
-          await interaction.response.send_message(embed=embed, ephemeral=True)        
-        else:
-            await interaction.response.send_message("You can't control these buttons!", ephemeral=True)
-        
+        await interaction.response.send_message(embed=embed, ephemeral=True)        
+
     @discord.ui.button(label='Configure', style=discord.ButtonStyle.secondary, custom_id='setup_button')
     async def _configure(self, interaction: discord.Interaction, button: discord.ui.Button):
         if self.author.id == interaction.user.id:
@@ -61,15 +57,18 @@ class SetupButtons(discord.ui.View):
 
     @discord.ui.button(emoji=config.DELETE, style=discord.ButtonStyle.red, custom_id='delete_button')
     async def _delete(self, interaction: discord.Interaction, button: discord.ui.Button):
-      view = ResetButton(self.bot)
-      await interaction.response.send_message("This will reset everything. Are you sure?", view=view, ephemeral=True)
+        if self.author.id != interaction.user.id:
+            await interaction.response.send_message("You can't control these buttons!", ephemeral=True)
+            return
+        view = ResetButton(self.bot)
+        await interaction.response.send_message("This will reset everything. Are you sure?", view=view, ephemeral=True)
 
 class ResetButton(discord.ui.View):
     def __init__(self, bot):
         super().__init__(timeout=None)
         self.bot = bot
 
-    @discord.ui.button(label="Yes, I'm sure" ,style=discord.ButtonStyle.green, custom_id='reset')
+    @discord.ui.button(label="Yes, I'm sure", style=discord.ButtonStyle.green, custom_id='reset')
     async def _reset(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
             with open('data/setup-data.json', 'w') as file:
@@ -143,6 +142,10 @@ class SetupModal(discord.ui.Modal):
         )
 
     async def on_submit(self, interaction: discord.Interaction):
+        if self.interaction.user.id != interaction.user.id:
+            await interaction.response.send_message("You can't control these buttons!", ephemeral=True)
+            return
+
         event_team_ids = self.children[0].value.split(',')
         event_manager_ids = self.children[1].value.split(',')
         modmail_channel_id = self.children[2].value.strip()
@@ -174,6 +177,10 @@ class FAQButtons(discord.ui.View):
         
     @discord.ui.button(label="View FAQs", style=discord.ButtonStyle.blurple)
     async def _view_faq(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if self.author.id != interaction.user.id:
+            await interaction.response.send_message("You can't control these buttons!", ephemeral=True)
+            return
+        
         if not os.path.exists('data/faq.json'):
             return
 
@@ -191,11 +198,8 @@ class FAQButtons(discord.ui.View):
         for i, faq in enumerate(faqs, 1):
           embed.add_field(name=f"{i}. {faq['question']}", value=faq['answer'], inline=False)
 
-        if self.author.id == interaction.user.id:
-            await interaction.response.send_message(embed=embed, ephemeral=True)        
-        else:
-            await interaction.response.send_message("You can't control these buttons!", ephemeral=True)
-        
+        await interaction.response.send_message(embed=embed, ephemeral=True)        
+
     @discord.ui.button(label='Edit FAQs', style=discord.ButtonStyle.secondary, custom_id='edit_faq_button')
     async def _edit_faq(self, interaction: discord.Interaction, button: discord.ui.Button):
         if self.author.id == interaction.user.id:
@@ -205,6 +209,9 @@ class FAQButtons(discord.ui.View):
 
     @discord.ui.button(emoji=config.DELETE, style=discord.ButtonStyle.red, custom_id='reset_faq_button')
     async def _reset_faq(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if self.author.id != interaction.user.id:
+            await interaction.response.send_message("You can't control these buttons!", ephemeral=True)
+            return
         view = FAQResetButton(self.bot)
         await interaction.response.send_message("This will delete all the FAQs data. Are you sure?", view=view, ephemeral=True)
 
@@ -213,8 +220,11 @@ class FAQResetButton(discord.ui.View):
         super().__init__(timeout=None)
         self.bot = bot
 
-    @discord.ui.button(label="Yes, I'm sure" ,style=discord.ButtonStyle.green, custom_id='reset')
+    @discord.ui.button(label="Yes, I'm sure", style=discord.ButtonStyle.green, custom_id='reset')
     async def _reset_faq_btn(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.id != self.bot.user.id:
+            await interaction.response.send_message("You can't control these buttons!", ephemeral=True)
+            return
         try:
             with open('data/faq.json', 'w') as file:
                 json.dump({}, file)
@@ -252,6 +262,10 @@ class FAQModal(discord.ui.Modal):
         )
 
     async def on_submit(self, interaction: discord.Interaction):
+        if self.interaction.user.id != interaction.user.id:
+            await interaction.response.send_message("You can't control these buttons!", ephemeral=True)
+            return
+
         question = self.children[0].value
         answer = self.children[1].value
 
