@@ -23,7 +23,7 @@ class Setup(commands.Cog):
     @app_commands.guild_only()
     async def _setup_faq(self, interaction: discord.Interaction):
 
-        embed = discord.Embed(title=f"{config.QUESTION} Edit FAQs", description="You know what to do ;)", color=0x27272F)
+        embed = discord.Embed(title=f"{config.QUESTION} Edit FAQs", description="Use the `Edit FAQs` button to edit the frequently asked questions for the ongoing event.", color=0x27272F)
 
         view = FAQButtons(self.bot, interaction)
         
