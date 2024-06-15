@@ -142,9 +142,6 @@ class SetupModal(discord.ui.Modal):
         )
 
     async def on_submit(self, interaction: discord.Interaction):
-        if self.interaction.user.id != interaction.user.id:
-            await interaction.response.send_message("You can't control these buttons!", ephemeral=True)
-            return
 
         event_team_ids = self.children[0].value.split(',')
         event_manager_ids = self.children[1].value.split(',')
